@@ -1,16 +1,28 @@
 import streamlit as st
 import streamlit_authenticator as stauth
+from dependencies import consulta_nome, consulta_geral, add_registro, cria_tabela
 
 COOCKI_EXPIRY_DAYS = 30
 
 def main():
+
+    try:
+        consulta_geral()
+    except:
+        cria_tabela()
+
+    db_query = consulta_geral()
+
+    registros = {'usernames': {}}
+    for data in db_query:
+        registros['usernames'][data[1]] = {'name': data[0], 'password': data[2]}
+
+
     authenticator = stauth.Authenticate(
-        {'usernames': {'teste': {'name': 'testando', 'password': 'blabla'}}},
+        registros,
         'random_cookie_name',
         'random_signature_key',
-
         COOCKI_EXPIRY_DAYS,
-
     )
 
     if 'clicou_registrar' not in st.session_state:
@@ -40,10 +52,10 @@ def confirm_msg():
     hashed_password = stauth.Hasher([st.session_state.pswrd]).generate()
     if st.session_state.pswrd != st.session_state.confirm_pswrd:
         st.warning('Senha não confere')
-    elif 'consulta_nome()':
+    elif consulta_nome():
         st.warning('Nome de usuários já existe.')
     else:
-        'add_registro()'
+        add_registro()
         st.success('Registro efetuado!')
 
 def usuario_form():
@@ -62,5 +74,4 @@ def usuario_form():
         st.rerun()
 
 if __name__ == '__main__':
-
     main()
